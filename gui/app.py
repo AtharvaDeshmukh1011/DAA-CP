@@ -373,7 +373,10 @@ class TSPApp(ctk.CTk):
             if last_path:
                 self.canvas_view.draw_path(last_path, "#4a4a4a", width=1, dash=(3, 3), close_loop=True)
             if best_path:
-                self.canvas_view.draw_path(best_path, COLOR_ACCEPTED_EDGE, width=2, close_loop=True)
+                self.canvas_view.draw_path(
+                    best_path, COLOR_ACCEPTED_EDGE, width=2, close_loop=True,
+                    arrow=True, show_distance=True,
+                )
 
         elif algo == "held_karp":
             subset = self.run_state.get("dp_subset") or []
@@ -386,14 +389,18 @@ class TSPApp(ctk.CTk):
         elif algo == "nearest_neighbor":
             path = self.run_state.get("path_so_far") or []
             if path:
-                self.canvas_view.draw_path(path, COLOR_PATH_SO_FAR, width=2)
+                self.canvas_view.draw_path(
+                    path, COLOR_PATH_SO_FAR, width=2, arrow=True, show_distance=True,
+                )
             last_edge = self.run_state.get("last_edge")
             if last_edge:
                 self.canvas_view.draw_edge(*last_edge, COLOR_CURRENT_EDGE, width=3, tag="transient")
 
         elif algo == "greedy_edge":
             for (i, j) in self.run_state.get("accepted_edges", []):
-                self.canvas_view.draw_edge(i, j, COLOR_ACCEPTED_EDGE, width=2, tag="dynamic")
+                self.canvas_view.draw_edge(
+                    i, j, COLOR_ACCEPTED_EDGE, width=2, tag="dynamic", show_distance=True,
+                )
             last_edge = self.run_state.get("last_edge")
             if last_edge:
                 color = COLOR_ACCEPTED_EDGE if self.run_state.get("last_accepted") else COLOR_REJECTED_EDGE
