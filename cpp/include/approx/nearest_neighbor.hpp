@@ -6,10 +6,6 @@
 #include "../tsp_types.hpp"
 #include "../step_emitter.hpp"
 
-// Time complexity: O(n^2) -- at each of n steps, scan all unvisited cities
-// for the nearest one. Space: O(n).
-// Heuristic quality: can be arbitrarily bad in the worst case, but on
-// random Euclidean instances typically lands within ~25% of optimal.
 inline Tour solve_nearest_neighbor(const Instance& inst, int start = 0) {
     const int n = inst.size();
     Tour result;

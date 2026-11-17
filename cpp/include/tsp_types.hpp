@@ -9,8 +9,6 @@ struct Point {
     double y = 0.0;
 };
 
-// Symmetric Euclidean TSP instance. Precomputes the full distance matrix
-// once so every algorithm queries dist(i, j) in O(1).
 class Instance {
 public:
     explicit Instance(std::vector<Point> pts) : points_(std::move(pts)) {
@@ -37,7 +35,7 @@ private:
 };
 
 struct Tour {
-    std::vector<int> order; // permutation of [0, n)
+    std::vector<int> order;
     double length = 0.0;
 };
 

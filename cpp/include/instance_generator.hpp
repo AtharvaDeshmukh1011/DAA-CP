@@ -4,7 +4,6 @@
 #include <vector>
 #include "tsp_types.hpp"
 
-// Uniform random Euclidean instance in [0, box] x [0, box], reproducible via seed.
 inline std::vector<Point> generate_random_instance(int n, unsigned seed, double box = 1000.0) {
     std::mt19937 rng(seed);
     std::uniform_real_distribution<double> dist(0.0, box);

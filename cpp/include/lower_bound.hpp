@@ -4,10 +4,6 @@
 #include <limits>
 #include "tsp_types.hpp"
 
-// MST weight via Prim's algorithm, O(n^2).
-// For metric (triangle-inequality) TSP, the optimal tour length is always
-// >= MST weight, so this is a cheap, rigorous lower bound we can display
-// against approximate tours even when the true optimum is intractable to compute.
 inline double mst_lower_bound(const Instance& inst) {
     const int n = inst.size();
     if (n <= 1) return 0.0;

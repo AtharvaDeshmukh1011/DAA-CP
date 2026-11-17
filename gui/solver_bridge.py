@@ -1,12 +1,3 @@
-"""Subprocess bridge to the C++ solver binary.
-
-Starts `solver.exe <algorithm>`, feeds it the instance on stdin, and reads
-its line-delimited JSON stdout in a background thread so the Tkinter main
-loop is never blocked waiting on the child process. The main loop drains
-parsed messages from a thread-safe queue on its own schedule (see
-`poll_all` / `poll_one` in app.py).
-"""
-
 from __future__ import annotations
 
 import json
@@ -17,19 +8,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SOLVER_PATH = PROJECT_ROOT / "cpp" / "bin" / "solver.exe"
 
-
 @dataclass
 class SolverMessage:
-    kind: str  # "step" | "done" | "error"
+    kind: str
     data: dict
 
-
 class SolverBridge:
-    """Owns one solver.exe run at a time."""
 
     def __init__(self) -> None:
         self._proc: Optional[subprocess.Popen] = None
@@ -42,7 +29,7 @@ class SolverBridge:
         return SOLVER_PATH.exists()
 
     def start(self, algorithm: str, points: list[tuple[float, float]]) -> None:
-        self.stop()  # make sure any previous run is cleaned up
+        self.stop()
         self._queue = queue.Queue()
         self._finished.clear()
 
@@ -79,7 +66,6 @@ class SolverBridge:
         self._finished.set()
 
     def poll_all(self) -> list[SolverMessage]:
-        """Non-blocking: drain and return everything currently queued."""
         messages = []
         while True:
             try:

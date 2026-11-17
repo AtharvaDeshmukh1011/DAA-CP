@@ -1,16 +1,3 @@
-// Self-contained assert-based correctness harness (no external test
-// framework available without a package manager here -- see README).
-//
-// Checks:
-//   1. Brute force and Held-Karp agree on optimal length for random small
-//      instances (both are exact, so they must match).
-//   2. All four algorithms always produce a valid Hamiltonian cycle
-//      (every city visited exactly once).
-//   3. Edge cases n = 1, 2, 3 don't crash and produce valid tours.
-//
-// Algorithm step output (normally streamed to stdout for the GUI) is
-// redirected to a discard stream here so test output stays readable.
-
 #include <cassert>
 #include <cmath>
 #include <iostream>
@@ -40,8 +27,6 @@ bool nearly_equal(double a, double b, double eps = 1e-6) {
     return std::fabs(a - b) < eps * std::max(1.0, std::max(std::fabs(a), std::fabs(b)));
 }
 
-// Redirect std::cout for the duration of a call so per-step JSON output
-// (meant for the GUI) doesn't clutter the test run.
 template <typename Fn>
 auto run_quiet(Fn&& fn) {
     std::ostringstream discard;
@@ -62,12 +47,12 @@ void check(bool condition, const std::string& label) {
     }
 }
 
-} // namespace
+}
 
 int main() {
-    // --- Edge cases: n = 1, 2, 3 ---
+
     for (int n : {1, 2, 3}) {
-        auto pts = generate_random_instance(n, /*seed=*/42);
+        auto pts = generate_random_instance(n, 42);
         Instance inst(pts);
 
         Tour bf = run_quiet([&] { return solve_brute_force(inst); });
@@ -86,9 +71,8 @@ int main() {
         }
     }
 
-    // --- Brute force vs Held-Karp agreement on several random small instances ---
     for (unsigned seed = 1; seed <= 8; ++seed) {
-        int n = 5 + static_cast<int>(seed % 4); // n in [5, 8]
+        int n = 5 + static_cast<int>(seed % 4);
         auto pts = generate_random_instance(n, seed * 1000);
         Instance inst(pts);
 
@@ -102,9 +86,8 @@ int main() {
               "valid cycles from exact algorithms, seed=" + std::to_string(seed));
     }
 
-    // --- NN and Greedy Edge always produce valid cycles, including on larger n ---
     for (int n : {10, 25, 60}) {
-        auto pts = generate_random_instance(n, /*seed=*/7);
+        auto pts = generate_random_instance(n, 7);
         Instance inst(pts);
 
         Tour nn = run_quiet([&] { return solve_nearest_neighbor(inst); });

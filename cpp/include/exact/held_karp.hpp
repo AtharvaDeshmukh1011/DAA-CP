@@ -7,11 +7,6 @@
 #include "../tsp_types.hpp"
 #include "../step_emitter.hpp"
 
-// Time complexity: O(n^2 * 2^n), space: O(n * 2^n) for dp/parent tables.
-// dp[mask][j] = shortest path that visits exactly the cities in `mask`
-// (mask always includes city 0, the fixed start) and ends at city j.
-// Transition: dp[mask | {k}][k] = min over j in mask of dp[mask][j] + dist(j,k).
-// Answer: min over j != 0 of dp[full][j] + dist(j, 0), closing the cycle.
 inline Tour solve_held_karp(const Instance& inst) {
     const int n = inst.size();
     Tour result;
@@ -26,17 +21,17 @@ inline Tour solve_held_karp(const Instance& inst) {
     std::vector<std::vector<double>> dp(full, std::vector<double>(n, INF));
     std::vector<std::vector<int>> parent(full, std::vector<int>(n, -1));
 
-    dp[1][0] = 0.0; // mask = {0}, path ends at 0
+    dp[1][0] = 0.0;
 
     for (int mask = 1; mask < full; ++mask) {
-        if (!(mask & 1)) continue; // every reachable mask must contain start city 0
+        if (!(mask & 1)) continue;
         for (int j = 0; j < n; ++j) {
             if (!(mask & (1 << j))) continue;
             double cur = dp[mask][j];
             if (cur == INF) continue;
 
             for (int k = 0; k < n; ++k) {
-                if (mask & (1 << k)) continue; // k already visited in this subset
+                if (mask & (1 << k)) continue;
                 int next_mask = mask | (1 << k);
                 double cand = cur + inst.dist(j, k);
                 if (cand < dp[next_mask][k]) {

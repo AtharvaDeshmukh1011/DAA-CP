@@ -8,15 +8,6 @@
 #include "../tsp_types.hpp"
 #include "../step_emitter.hpp"
 
-// Time complexity: O(n!) -- tries every permutation of cities 1..n-1 with
-// city 0 fixed as the start (fixing the start removes the n-fold rotational
-// redundancy of an otherwise O(n * n!) search; direction is still explored
-// both ways, which is fine -- it just means we see the reverse tour too).
-// Space: O(n) beyond the input.
-//
-// Only practical up to ~n=10 (10! = 3.6M permutations); callers are expected
-// to enforce that cap themselves (see MAX_BRUTE_FORCE_N in solver.cpp) since
-// this header has no opinion on what the caller considers "too slow".
 inline Tour solve_brute_force(const Instance& inst) {
     const int n = inst.size();
     Tour best;
@@ -27,7 +18,7 @@ inline Tour solve_brute_force(const Instance& inst) {
     }
 
     std::vector<int> perm(n - 1);
-    std::iota(perm.begin(), perm.end(), 1); // cities 1..n-1
+    std::iota(perm.begin(), perm.end(), 1);
 
     std::vector<int> best_path;
     double best_len = std::numeric_limits<double>::infinity();

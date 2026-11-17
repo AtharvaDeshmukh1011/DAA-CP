@@ -1,24 +1,11 @@
-"""Drawing primitives for the TSP canvas.
-
-City coordinates are used directly as canvas pixel coordinates (both random
-generation and click-placement keep points inside the visible canvas area),
-so no world<->screen transform is needed here -- it's kept intentionally
-simple since the point of this view is the algorithm animation, not a
-scrollable/zoomable map.
-
-There's no real geography behind these coordinates, so "km" is a demo scale
-(PIXELS_PER_KM below) rather than a real-world distance -- it exists so
-edge lengths read as a familiar unit instead of raw pixel counts.
-"""
-
 from __future__ import annotations
 
 import math
 import tkinter as tk
 
 CITY_RADIUS = 6
-PIXELS_PER_KM = 20  # arbitrary demo scale: 20px of canvas == 1 km
-LINE_END_GAP = 9    # shrink lines by this much at each end so arrowheads/dots don't overlap
+PIXELS_PER_KM = 20
+LINE_END_GAP = 9
 
 COLOR_BG = "#12161c"
 COLOR_CITY = "#e8ecf1"
@@ -32,14 +19,11 @@ COLOR_DP_SUBSET = "#9b59b6"
 COLOR_FINAL_TOUR = "#2ecc71"
 COLOR_DISTANCE_LABEL = "#aab2bd"
 
-
 class CanvasView:
     def __init__(self, canvas: tk.Canvas) -> None:
         self.canvas = canvas
         self.canvas.configure(bg=COLOR_BG, highlightthickness=0)
         self.points: list[tuple[float, float]] = []
-
-    # -- city management -------------------------------------------------
 
     def set_points(self, points: list[tuple[float, float]]) -> None:
         self.points = points
@@ -62,8 +46,6 @@ class CanvasView:
         self.canvas.delete("all")
         self.points = []
 
-    # -- dynamic (per-step) layer ------------------------------------------
-
     def clear_dynamic(self) -> None:
         self.canvas.delete("dynamic")
 
@@ -71,9 +53,6 @@ class CanvasView:
         self.canvas.delete("transient")
 
     def _edge_coords(self, i: int, j: int) -> tuple[float, float, float, float]:
-        """Endpoints for the line i->j, shrunk at both ends so it doesn't
-        run underneath the city dots (which matters most once we're
-        drawing arrowheads -- an arrow tip buried in a dot is invisible)."""
         x1, y1 = self.points[i]
         x2, y2 = self.points[j]
         dx, dy = x2 - x1, y2 - y1

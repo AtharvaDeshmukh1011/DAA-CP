@@ -1,9 +1,3 @@
-"""TSP Visualizer -- CustomTkinter GUI that drives the C++ solver and
-animates its actual step-by-step execution trace (not a canned replay).
-
-Run with: python app.py   (build the C++ solver first: cpp/build.sh or build.bat)
-"""
-
 from __future__ import annotations
 
 import random
@@ -25,7 +19,6 @@ CANVAS_W, CANVAS_H = 760, 680
 MARGIN = 40
 TICK_MS = 30
 
-# (display name, solver key, complexity blurb, max n or None)
 ALGORITHMS = [
     ("Nearest Neighbor", "nearest_neighbor", "Approximate | O(n²) time, O(n) space", None),
     ("Greedy Edge", "greedy_edge", "Approximate | O(n² log n) time, O(n²) space", None),
@@ -34,14 +27,12 @@ ALGORITHMS = [
 ]
 ALGO_BY_NAME = {a[0]: a for a in ALGORITHMS}
 
-# What each colour on the canvas means, per algorithm (shown under the menu).
 LEGENDS = {
     "nearest_neighbor": "Blue = tour so far  |  Orange = edge just taken",
     "greedy_edge": "Green = accepted edge  |  Red = rejected (cycle / degree > 2)",
     "held_karp": "Purple = cities in current DP subset  |  Orange = last city",
     "brute_force": "Grey dashed = permutation being tried  |  Green = best so far",
 }
-
 
 class TSPApp(ctk.CTk):
     def __init__(self) -> None:
@@ -64,8 +55,6 @@ class TSPApp(ctk.CTk):
         self._on_algo_change(ALGORITHMS[0][0])
         self._regenerate_random(int(self.city_slider.get()))
 
-    # -- layout ------------------------------------------------------------
-
     def _build_layout(self) -> None:
         canvas_frame = ctk.CTkFrame(self, corner_radius=8)
         canvas_frame.pack(side="left", padx=(12, 6), pady=12)
@@ -86,7 +75,6 @@ class TSPApp(ctk.CTk):
             font=("Segoe UI", 11), text_color="#8b93a1", wraplength=290, justify="left",
         ).pack(anchor="w", padx=14, pady=(0, 10))
 
-        # Algorithm selection
         ctk.CTkLabel(panel, text="Algorithm", font=("Segoe UI", 12, "bold")).pack(anchor="w", padx=14)
         self.algo_menu = ctk.CTkOptionMenu(
             panel, values=[a[0] for a in ALGORITHMS], command=self._on_algo_change, width=290,
@@ -97,7 +85,6 @@ class TSPApp(ctk.CTk):
         )
         self.algo_info_label.pack(anchor="w", padx=14, pady=(0, 10))
 
-        # City count / generation
         ctk.CTkLabel(panel, text="Cities", font=("Segoe UI", 12, "bold")).pack(anchor="w", padx=14)
         self.city_count_label = ctk.CTkLabel(panel, text="10", font=("Segoe UI", 11))
         self.city_count_label.pack(anchor="w", padx=14)
@@ -117,7 +104,6 @@ class TSPApp(ctk.CTk):
             side="left"
         )
 
-        # Animation controls
         ctk.CTkLabel(panel, text="Animation", font=("Segoe UI", 12, "bold")).pack(anchor="w", padx=14, pady=(6, 0))
         self.instant_var = ctk.BooleanVar(value=False)
         ctk.CTkCheckBox(
@@ -131,7 +117,6 @@ class TSPApp(ctk.CTk):
         self.speed_slider.set(3)
         self.speed_slider.pack(padx=14, pady=(0, 10))
 
-        # Run / stop
         run_row = ctk.CTkFrame(panel, fg_color="transparent")
         run_row.pack(padx=14, pady=(4, 10), fill="x")
         self.run_button = ctk.CTkButton(run_row, text="Run", width=140, command=self._start_run)
@@ -147,7 +132,6 @@ class TSPApp(ctk.CTk):
         )
         self.status_label.pack(anchor="w", padx=14, pady=(0, 6))
 
-        # Stats
         ctk.CTkLabel(panel, text="Stats", font=("Segoe UI", 12, "bold")).pack(anchor="w", padx=14, pady=(6, 0))
         self.stats_label = ctk.CTkLabel(
             panel, text="Length: --\nTime: --\nLower bound: --\nSteps: --",
@@ -155,13 +139,10 @@ class TSPApp(ctk.CTk):
         )
         self.stats_label.pack(anchor="w", padx=14, pady=(4, 10))
 
-        # Run history
         ctk.CTkLabel(panel, text="Run History", font=("Segoe UI", 12, "bold")).pack(anchor="w", padx=14)
         self.history_box = ctk.CTkTextbox(panel, width=290, height=160, font=("Consolas", 10))
         self.history_box.pack(padx=14, pady=(4, 10))
         self.history_box.configure(state="disabled")
-
-    # -- city management -----------------------------------------------------
 
     def _on_canvas_click(self, event: tk.Event) -> None:
         if self.running:
@@ -197,8 +178,6 @@ class TSPApp(ctk.CTk):
         self.status_label.configure(text="")
         self.stats_label.configure(text="Length: --\nTime: --\nLower bound: --\nSteps: --")
 
-    # -- controls --------------------------------------------------------
-
     def _on_city_slider(self, value: float) -> None:
         self.city_count_label.configure(text=str(int(value)))
         self._update_algo_info()
@@ -219,8 +198,6 @@ class TSPApp(ctk.CTk):
             if n > cap:
                 text += f"  ⚠ current n={n} exceeds this cap"
         self.algo_info_label.configure(text=text)
-
-    # -- run lifecycle -----------------------------------------------------
 
     def _start_run(self) -> None:
         if self.running:
@@ -276,7 +253,7 @@ class TSPApp(ctk.CTk):
     def _tick(self) -> None:
         instant = self.instant_var.get()
         if instant:
-            # Drain everything the solver has (or will shortly have) right now.
+
             import time as _time
             deadline = _time.time() + 5.0
             messages = []
@@ -351,8 +328,6 @@ class TSPApp(ctk.CTk):
         self.history_box.see("end")
         self.history_box.configure(state="disabled")
 
-    # -- per-algorithm step rendering ---------------------------------------
-
     def _apply_step(self, step: dict) -> None:
         algo = self.run_state["algo"]
         if algo == "brute_force":
@@ -425,7 +400,6 @@ class TSPApp(ctk.CTk):
             if last_edge:
                 color = COLOR_ACCEPTED_EDGE if self.run_state.get("last_accepted") else COLOR_REJECTED_EDGE
                 self.canvas_view.draw_edge(*last_edge, color, width=2, tag="transient")
-
 
 if __name__ == "__main__":
     app = TSPApp()

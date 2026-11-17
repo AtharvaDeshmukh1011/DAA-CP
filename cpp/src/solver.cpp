@@ -10,14 +10,14 @@
 #include "approx/greedy_edge.hpp"
 
 namespace {
-constexpr int MAX_BRUTE_FORCE_N = 10;  // (n-1)! permutations
-constexpr int MAX_HELD_KARP_N = 20;    // O(n^2 * 2^n) time and O(n * 2^n) memory
+constexpr int MAX_BRUTE_FORCE_N = 10;
+constexpr int MAX_HELD_KARP_N = 20;
 
 void emit_error(const std::string& message) {
     std::cout << "{\"type\":\"error\",\"message\":\"" << message << "\"}\n";
     std::cout.flush();
 }
-} // namespace
+}
 
 int main(int argc, char** argv) {
     if (argc < 2) {

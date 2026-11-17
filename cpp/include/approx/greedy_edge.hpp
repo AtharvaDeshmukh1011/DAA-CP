@@ -21,17 +21,8 @@ struct Edge {
     double dist;
 };
 
-} // namespace greedy_detail
+}
 
-// Time complexity: O(n^2 log n) -- generate all C(n,2) candidate edges,
-// sort them, then scan once with union-find (near O(alpha(n)) per query).
-// Space: O(n^2) for the candidate edge list.
-//
-// Classic "multi-fragment" greedy-edge heuristic: repeatedly take the
-// cheapest remaining edge that doesn't give a vertex degree 3 and doesn't
-// close a sub-cycle early (unless it's the final edge completing the full
-// Hamiltonian cycle). On metric instances this reliably beats nearest
-// neighbor's worst cases.
 inline Tour solve_greedy_edge(const Instance& inst) {
     using namespace greedy_detail;
     const int n = inst.size();
