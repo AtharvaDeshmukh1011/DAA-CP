@@ -266,7 +266,7 @@ class TSPApp(ctk.CTk):
                     _time.sleep(0.01)
         else:
             batch_size = max(1, int(self.speed_slider.get()))
-            messages = self.bridge.poll_all()[:batch_size]
+            messages = self.bridge.poll(batch_size)
 
         finished_msg = None
         for msg in messages:

@@ -65,6 +65,15 @@ class SolverBridge:
             self._queue.put(SolverMessage(kind=kind, data=obj))
         self._finished.set()
 
+    def poll(self, limit: int) -> list[SolverMessage]:
+        messages = []
+        while len(messages) < limit:
+            try:
+                messages.append(self._queue.get_nowait())
+            except queue.Empty:
+                break
+        return messages
+
     def poll_all(self) -> list[SolverMessage]:
         messages = []
         while True:
