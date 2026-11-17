@@ -1,22 +1,3 @@
-// TSP solver CLI.
-//
-// Usage: solver <algorithm>
-//   algorithm: brute_force | held_karp | nearest_neighbor | greedy_edge
-//
-// Input (stdin):
-//   line 1: n
-//   next n lines: "x y" (doubles), one city per line
-//
-// Output (stdout): line-delimited JSON.
-//   One {"type":"step", ...} line per algorithm step (see the individual
-//   algorithm headers for each step's fields), then exactly one
-//   {"type":"done", "tour":[...], "length":.., "time_ms":.., "lower_bound":..}
-//   line at the end.
-//
-// Errors (e.g. unknown algorithm, instance too large for the requested
-// algorithm) are reported as {"type":"error","message":"..."} on stdout
-// and exit code 1, so the GUI can parse failures the same way as results.
-
 #include <iostream>
 #include <string>
 #include <vector>
