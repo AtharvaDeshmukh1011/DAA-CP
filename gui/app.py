@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import random
 import tkinter as tk
 
@@ -26,6 +27,19 @@ ALGORITHMS = [
     ("Brute Force", "brute_force", "Exact | O(n!) time, O(n) space", 10),
 ]
 ALGO_BY_NAME = {a[0]: a for a in ALGORITHMS}
+
+MAX_ANIMATED_STEPS = 100_000
+TARGET_ANIMATION_TICKS = 600
+
+
+def estimate_steps(algo: str, n: int) -> int:
+    if algo == "brute_force":
+        return math.factorial(max(n - 1, 0))
+    if algo == "held_karp":
+        return n * n * (2 ** n) // 4
+    if algo == "greedy_edge":
+        return n * (n - 1) // 2
+    return n
 
 LEGENDS = {
     "nearest_neighbor": "Blue = tour so far  |  Orange = edge just taken",
@@ -218,8 +232,11 @@ class TSPApp(ctk.CTk):
             self.status_label.configure(text=f"{name} is capped at n≤{cap}; you have n={n}.")
             return
 
+        estimate = estimate_steps(algo_key, n)
+        self.quiet = self.instant_var.get() or estimate > MAX_ANIMATED_STEPS
+        self.min_batch = max(1, math.ceil(estimate / TARGET_ANIMATION_TICKS))
         try:
-            self.bridge.start(algo_key, self.points)
+            self.bridge.start(algo_key, self.points, quiet=self.quiet)
         except OSError as e:
             self.status_label.configure(
                 text=f"Could not start solver.exe: {e.strerror or e}\n"
@@ -234,7 +251,11 @@ class TSPApp(ctk.CTk):
         self.running = True
         self.run_button.configure(state="disabled")
         self.stop_button.configure(state="normal")
-        self.status_label.configure(text=f"Running {name} on {n} cities...", text_color="#8b93a1")
+        if self.quiet and not self.instant_var.get():
+            msg = f"Running {name} on {n} cities. Too many steps to animate, so only the result is shown..."
+        else:
+            msg = f"Running {name} on {n} cities..."
+        self.status_label.configure(text=msg, text_color="#8b93a1")
 
         self._after_id = self.after(TICK_MS, self._tick)
 
@@ -251,21 +272,10 @@ class TSPApp(ctk.CTk):
         self.status_label.configure(text="Stopped.", text_color="#8b93a1")
 
     def _tick(self) -> None:
-        instant = self.instant_var.get()
-        if instant:
-
-            import time as _time
-            deadline = _time.time() + 5.0
-            messages = []
-            while _time.time() < deadline:
-                batch = self.bridge.poll_all()
-                messages.extend(batch)
-                if self.bridge.is_finished():
-                    break
-                if not batch:
-                    _time.sleep(0.01)
+        if self.quiet:
+            messages = self.bridge.poll_all()
         else:
-            batch_size = max(1, int(self.speed_slider.get()))
+            batch_size = max(int(self.speed_slider.get()), self.min_batch)
             messages = self.bridge.poll(batch_size)
 
         finished_msg = None
@@ -315,7 +325,7 @@ class TSPApp(ctk.CTk):
                 f"Length: {length:.2f}\n"
                 f"Time: {time_ms:.3f} ms\n"
                 f"Lower bound: {lower_bound:.2f}\n"
-                f"Steps: {self.step_count}"
+                f"Steps: {'not animated' if self.quiet else self.step_count}"
             )
         )
 

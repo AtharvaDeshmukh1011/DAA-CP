@@ -28,13 +28,13 @@ class SolverBridge:
     def solver_available() -> bool:
         return SOLVER_PATH.exists()
 
-    def start(self, algorithm: str, points: list[tuple[float, float]]) -> None:
+    def start(self, algorithm: str, points: list[tuple[float, float]], quiet: bool = False) -> None:
         self.stop()
         self._queue = queue.Queue()
         self._finished.clear()
 
         self._proc = subprocess.Popen(
-            [str(SOLVER_PATH), algorithm],
+            [str(SOLVER_PATH), algorithm] + (["quiet"] if quiet else []),
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <streambuf>
 #include <string>
 #include <vector>
 #include "tsp_types.hpp"
@@ -10,6 +11,10 @@
 #include "approx/greedy_edge.hpp"
 
 namespace {
+struct NullBuffer : std::streambuf {
+    int overflow(int c) override { return c; }
+};
+
 constexpr int MAX_BRUTE_FORCE_N = 10;
 constexpr int MAX_HELD_KARP_N = 20;
 
@@ -51,6 +56,11 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    bool quiet = argc > 2 && std::string(argv[2]) == "quiet";
+    NullBuffer null_buffer;
+    std::streambuf* real_out = std::cout.rdbuf();
+    if (quiet) std::cout.rdbuf(&null_buffer);
+
     auto start = Clock::now();
     Tour result;
     if (algo == "brute_force") {
@@ -66,6 +76,7 @@ int main(int argc, char** argv) {
         return 1;
     }
     auto end = Clock::now();
+    std::cout.rdbuf(real_out);
 
     double lb = mst_lower_bound(inst);
 
