@@ -8,6 +8,31 @@ answer.
 - **Exact**: Brute Force (O(n!)), Held-Karp Dynamic Programming (O(n²·2ⁿ))
 - **Approximate**: Nearest Neighbor (O(n²)), Greedy Edge (O(n² log n))
 
+## Algorithms at a glance
+
+| Algorithm        | Type        | Time        | Space     | Idea                                                        | GUI limit |
+|------------------|-------------|-------------|-----------|-------------------------------------------------------------|-----------|
+| Brute Force      | Exact       | O(n!)       | O(n)      | Try every permutation, keep the shortest                    | n ≤ 10    |
+| Held-Karp (DP)   | Exact       | O(n²·2ⁿ)    | O(n·2ⁿ)   | Best path through each subset ending at each city           | n ≤ 20    |
+| Nearest Neighbor | Approximate | O(n²)       | O(n)      | Always walk to the closest unvisited city                   | none      |
+| Greedy Edge      | Approximate | O(n² log n) | O(n²)     | Add shortest edges first, skip ones that close a cycle early or give a city degree > 2 | none |
+
+## Project structure
+
+```
+cpp/
+  include/exact/     brute_force.hpp, held_karp.hpp
+  include/approx/    nearest_neighbor.hpp, greedy_edge.hpp
+  include/           lower_bound.hpp (MST bound), step_emitter.hpp, tsp_types.hpp
+  src/solver.cpp     CLI entry point, streams JSON steps
+  tests/             correctness tests
+gui/
+  app.py             CustomTkinter window and controls
+  canvas_view.py     drawing cities, edges, arrows, distances
+  solver_bridge.py   runs solver.exe and reads its output
+docs/TSP_Guide.docx  beginner's guide to the project
+```
+
 ## Why it's built this way
 
 The GUI (`gui/`) never reimplements the algorithms — it spawns the real C++

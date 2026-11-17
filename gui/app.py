@@ -34,6 +34,14 @@ ALGORITHMS = [
 ]
 ALGO_BY_NAME = {a[0]: a for a in ALGORITHMS}
 
+# What each colour on the canvas means, per algorithm (shown under the menu).
+LEGENDS = {
+    "nearest_neighbor": "Blue = tour so far  |  Orange = edge just taken",
+    "greedy_edge": "Green = accepted edge  |  Red = rejected (cycle / degree > 2)",
+    "held_karp": "Purple = cities in current DP subset  |  Orange = last city",
+    "brute_force": "Grey dashed = permutation being tried  |  Green = best so far",
+}
+
 
 class TSPApp(ctk.CTk):
     def __init__(self) -> None:
@@ -203,9 +211,9 @@ class TSPApp(ctk.CTk):
 
     def _update_algo_info(self) -> None:
         name = self.algo_menu.get()
-        _, _, blurb, cap = ALGO_BY_NAME[name]
+        _, key, blurb, cap = ALGO_BY_NAME[name]
         n = int(self.city_slider.get())
-        text = blurb
+        text = blurb + "\n" + LEGENDS[key]
         if cap is not None:
             text += f"\ncapped at n≤{cap}"
             if n > cap:
@@ -233,6 +241,16 @@ class TSPApp(ctk.CTk):
             self.status_label.configure(text=f"{name} is capped at n≤{cap}; you have n={n}.")
             return
 
+        try:
+            self.bridge.start(algo_key, self.points)
+        except OSError as e:
+            self.status_label.configure(
+                text=f"Could not start solver.exe: {e.strerror or e}\n"
+                     "Windows may be blocking it. Rebuild with cpp/build.bat.",
+                text_color="#e74c3c",
+            )
+            return
+
         self._clear_run_visuals()
         self.step_count = 0
         self.run_state = {"algo": algo_key}
@@ -241,7 +259,6 @@ class TSPApp(ctk.CTk):
         self.stop_button.configure(state="normal")
         self.status_label.configure(text=f"Running {name} on {n} cities...", text_color="#8b93a1")
 
-        self.bridge.start(algo_key, self.points)
         self._after_id = self.after(TICK_MS, self._tick)
 
     def _stop_run(self) -> None:
@@ -287,6 +304,9 @@ class TSPApp(ctk.CTk):
                 break
 
         self._redraw_dynamic()
+
+        if finished_msg is None and self.bridge.is_finished():
+            finished_msg = ("error", {"message": "Solver exited without a result."})
 
         if finished_msg is not None:
             kind, data = finished_msg
